@@ -1,3 +1,5 @@
+### 📄 CMakeLists.txt
+```cmake
 cmake_minimum_required(VERSION 3.13)
 include(pico_sdk_import.cmake)
 project(rp2040_netsupply C CXX ASM)
@@ -12,7 +14,15 @@ add_executable(rp2040_netsupply
     src/config.c
     src/ethernet.c
 )
+
 target_include_directories(rp2040_netsupply PRIVATE include)
-target_link_libraries(rp2040_netsupply pico_stdlib hardware_spi hardware_uart lwip)
+
+target_link_libraries(rp2040_netsupply
+    pico_stdlib
+    hardware_spi
+    hardware_uart
+    hardware_pio
+    lwip
+)
 
 pico_add_extra_outputs(rp2040_netsupply)

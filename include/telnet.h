@@ -1,6 +1,10 @@
-/* --- telnet.h --- */
-#ifndef TELNET_H
-#define TELNET_H
-void telnet_start(int port, int baud);
+// telnet.h – optionaler Telnet Server
+
+#pragma once
+#include "pico/stdlib.h"
+#include "hardware/uart.h"
+#include "lwip/tcp.h"
+
+void telnet_start(uint16_t port, uart_inst_t *uart_id);
 void telnet_stop(void);
-#endif
+void telnet_task(void);

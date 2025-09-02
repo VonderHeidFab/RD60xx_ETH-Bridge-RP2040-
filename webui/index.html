@@ -1,13 +1,58 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="de">
 <head>
-  <meta charset="utf-8">
-  <title>RP2040 WebUI</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <title>RP2040 Netzteil Control</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
 </head>
 <body>
-  <h1>RP2040 Netzteil Webinterface</h1>
-  <p>Dies ist ein Platzhalter für das dynamische WebUI.</p>
-  <script src="script.js"></script>
+    <header>
+        <h1>RP2040 Netzteil Ethernet-Bridge</h1>
+        <nav>
+            <button onclick="showTab('netzwerk')">Netzwerk</button>
+            <button onclick="showTab('bedienen')">Bedienen</button>
+            <button onclick="showTab('service')">Service</button>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Netzwerk -->
+        <section id="netzwerk" class="tab">
+            <h2>Netzwerkkonfiguration</h2>
+            <form id="netform" onsubmit="saveNetwork(event)">
+                <label><input type="checkbox" id="dhcp"> DHCP verwenden</label><br>
+                <label>IP-Adresse: <input type="text" id="ip"></label><br>
+                <label>Subnetzmaske: <input type="text" id="netmask"></label><br>
+                <label>Gateway: <input type="text" id="gateway"></label><br>
+                <label><input type="checkbox" id="telnet"> Telnet aktivieren</label><br>
+                <button type="submit">Speichern</button>
+            </form>
+        </section>
+
+        <!-- Bedienen -->
+        <section id="bedienen" class="tab hidden">
+            <h2>Manuelle Bedienung</h2>
+            <div id="controls">
+                <label>Spannung (V): <input type="number" id="volt" step="0.01"></label><br>
+                <label>Strom (A): <input type="number" id="amp" step="0.01"></label><br>
+                <button onclick="sendCommand('OUT1')">Ausgang EIN</button>
+                <button onclick="sendCommand('OUT0')">Ausgang AUS</button>
+                <button onclick="sendCommand('MEAS')">Messwerte abrufen</button>
+            </div>
+            <pre id="output"></pre>
+        </section>
+
+        <!-- Service -->
+        <section id="service" class="tab hidden">
+            <h2>Service</h2>
+            <button onclick="resetDevice()">Werkseinstellungen</button>
+            <p>Beim Zurücksetzen wird die aktuelle Konfiguration als <code>config_backup.json</code> auf USB gespeichert.</p>
+        </section>
+    </main>
+
+    <footer>
+        <small>&copy; 2025 RP2040 Project – MIT License</small>
+    </footer>
 </body>
 </html>

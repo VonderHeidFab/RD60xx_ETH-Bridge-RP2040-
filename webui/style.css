@@ -1,2 +1,64 @@
-body { font-family: system-ui, sans-serif; background: #111; color: #eee; margin: 0; padding: 20px; }
-h1 { color: #6cf; }
+body {
+    font-family: Arial, sans-serif;
+    background: #f0f2f5;
+    margin: 0;
+    padding: 0;
+    color: #222;
+}
+
+header {
+    background: #333;
+    color: white;
+    padding: 1em;
+    text-align: center;
+}
+
+nav button {
+    margin: 0 5px;
+    padding: 0.5em 1em;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    background: #555;
+    color: white;
+}
+
+nav button:hover {
+    background: #777;
+}
+
+main {
+    padding: 1em;
+}
+
+.tab.hidden {
+    display: none;
+}
+
+form label {
+    display: block;
+    margin: 0.5em 0;
+}
+
+button {
+    margin-top: 1em;
+    padding: 0.5em 1em;
+    border: none;
+    border-radius: 4px;
+    background: #2b7cff;
+    color: white;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #1a5fd0;
+}
+
+#output {
+    background: #111;
+    color: #0f0;
+    padding: 0.5em;
+    border-radius: 5px;
+    margin-top: 1em;
+    min-height: 100px;
+}
