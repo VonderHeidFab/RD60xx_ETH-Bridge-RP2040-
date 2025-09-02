@@ -1,0 +1,42 @@
+; ws2812.pio
+; WS2812 / NeoPixel PIO program for RP2040
+; Author: OpenAI (angepasst für dich)
+; Clock: 8 MHz
+
+.program ws2812
+.side_set 1
+
+; ========================
+; WS2812 bit-banging PIO
+; ========================
+; This program assumes a 125 MHz system clock.
+; Adjust timing according to your system clock if necessary.
+
+bitloop:
+    out x, 1           side 0 [2]   ; Pull 1 bit from OSR, side-set low, wait 2 cycles
+    jmp !x do_zero      side 1 [4]  ; If bit is 0, jump to do_zero, else continue
+do_one:
+    nop                 side 1 [4]  ; Keep high for '1' timing
+    jmp end_bit          side 0 [2] ; End of bit, set low
+do_zero:
+    nop                 side 0 [4]  ; Keep low for '0' timing
+end_bit:
+    jmp bitloop          side 0    ; Next bit
+
+; ========================
+; Usage in C / MicroPython
+; ========================
+; In C:
+;   PIO pio = pio0;
+;   uint sm = 0;
+;   ws2812_program_init(pio, sm, pin);
+;
+; In MicroPython:
+;   import rp2
+;   from machine import Pin
+;   import array
+;   import time
+;   
+;   @rp2.asm_pio(sideset_init=rp2.PIO.OUT)
+;   def ws2812():
+;       ... (program above)

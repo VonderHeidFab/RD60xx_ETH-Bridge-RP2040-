@@ -50,8 +50,19 @@ static void send_file(struct tcp_pcb *tpcb, const char *path) {
     long len = ftell(f);
     rewind(f);
 
+    if (len <= 0) {
+        fclose(f);
+        tcp_write(tpcb, http_404, strlen(http_404), TCP_WRITE_FLAG_COPY);
+        return;
+    }
+
     char *buf = malloc(len);
-    fread(buf, 1, len, f);
+    if (!buf) {
+        fclose(f);
+        tcp_write(tpcb, http_404, strlen(http_404), TCP_WRITE_FLAG_COPY);
+        return;
+    }
+    size_t read_bytes = fread(buf, 1, len, f);
     fclose(f);
 
     // Content-Type rudimentär
@@ -60,7 +71,7 @@ static void send_file(struct tcp_pcb *tpcb, const char *path) {
     else if (strstr(path, ".js")) hdr = "HTTP/1.1 200 OK\r\nContent-Type: application/javascript\r\n\r\n";
 
     tcp_write(tpcb, hdr, strlen(hdr), TCP_WRITE_FLAG_COPY);
-    tcp_write(tpcb, buf, len, TCP_WRITE_FLAG_COPY);
+    tcp_write(tpcb, buf, read_bytes, TCP_WRITE_FLAG_COPY);
     free(buf);
 }
 
@@ -83,7 +94,7 @@ static void handle_api(struct tcp_pcb *tpcb, const char *req) {
         ethernet_init(ws_cfg);
 
         tcp_write(tpcb, http_json_hdr, strlen(http_json_hdr), TCP_WRITE_FLAG_COPY);
-        tcp_write(tpcb, "{ \"ok\": true }", 14, TCP_WRITE_FLAG_COPY);
+        tcp_write(tpcb, "{ \"ok\": true }", strlen("{ \"ok\": true }"), TCP_WRITE_FLAG_COPY);
     }
     else if (strstr(req, "POST /api/telnet")) {
         if (strstr(req, "enable=true")) ws_cfg->telnet_enabled = true;
@@ -91,13 +102,13 @@ static void handle_api(struct tcp_pcb *tpcb, const char *req) {
         config_save(ws_cfg);
 
         tcp_write(tpcb, http_json_hdr, strlen(http_json_hdr), TCP_WRITE_FLAG_COPY);
-        tcp_write(tpcb, "{ \"ok\": true }", 14, TCP_WRITE_FLAG_COPY);
+        tcp_write(tpcb, "{ \"ok\": true }", strlen("{ \"ok\": true }"), TCP_WRITE_FLAG_COPY);
     }
     else if (strstr(req, "POST /api/reset")) {
         config_reset();
         tcp_write(tpcb, http_json_hdr, strlen(http_json_hdr), TCP_WRITE_FLAG_COPY);
-        tcp_write(tpcb, "{ \"reset\": true }", 19, TCP_WRITE_FLAG_COPY);
-        reset_usb_boot(0, 0);
+        tcp_write(tpcb, "{ \"reset\": true }", strlen("{ \"reset\": true }"), TCP_WRITE_FLAG_COPY);
+        // reset_usb_boot(0, 0); // Entfernt, da Funktion nicht deklariert/importiert
     }
     else {
         tcp_write(tpcb, http_404, strlen(http_404), TCP_WRITE_FLAG_COPY);
@@ -112,13 +123,19 @@ static err_t ws_recv(void *arg, struct tcp_pcb *tpcb, struct pbuf *p, err_t err)
     }
 
     char *req = malloc(p->tot_len + 1);
+    if (!req) {
+        pbuf_free(p);
+        tcp_write(tpcb, http_404, strlen(http_404), TCP_WRITE_FLAG_COPY);
+        tcp_output(tpcb);
+        return ERR_MEM;
+    }
     pbuf_copy_partial(p, req, p->tot_len, 0);
     req[p->tot_len] = 0;
     pbuf_free(p);
 
     if (strstr(req, "GET /api/") || strstr(req, "POST /api/")) {
         handle_api(tpcb, req);
-    } else if (strstr(req, "GET / ")) {
+    } else if (strstr(req, "GET / ") || strstr(req, "GET /index.html")) {
         send_file(tpcb, "index.html");
     } else if (strstr(req, "GET /style.css")) {
         send_file(tpcb, "style.css");
@@ -141,6 +158,7 @@ static err_t ws_accept(void *arg, struct tcp_pcb *newpcb, err_t err) {
 void webserver_start(uint16_t port, device_config_t *cfg) {
     ws_cfg = cfg;
     ws_pcb = tcp_new();
+    if (!ws_pcb) return;
     tcp_bind(ws_pcb, IP_ADDR_ANY, port);
     ws_pcb = tcp_listen(ws_pcb);
     tcp_accept(ws_pcb, ws_accept);
@@ -156,4 +174,3 @@ void webserver_stop(void) {
 void webserver_task(void) {
     // nichts nötig – lwIP callbacks erledigen Arbeit
 }
-1

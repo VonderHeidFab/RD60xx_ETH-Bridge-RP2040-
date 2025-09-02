@@ -1,0 +1,2 @@
+#define NO_SYS 0
+#define LWIP_TCPIP_CORE_LOCKING_INPUT 1

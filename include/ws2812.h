@@ -2,6 +2,9 @@
 
 #pragma once
 #include "pico/stdlib.h"
+#include "hardware/pio.h"
+#include <stdint.h>
+#include <stdbool.h>
 
 // Zustände für LED0 (Status)
 typedef enum {
@@ -17,4 +20,5 @@ void ws2812_pulse_rx(void);
 void ws2812_pulse_tx(void);
 
 void ws2812_task(void);
+void ws2812_program_init(PIO pio, uint sm, uint offset, uint pin, uint freq, bool rgbw);
 

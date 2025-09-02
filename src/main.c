@@ -22,6 +22,7 @@
 #include "telnet.h"
 #include "webserver.h"
 #include "ws2812.h"
+#include <string.h>
 
 // UART Settings for RD60062
 #define PSU_UART_ID uart0
