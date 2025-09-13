@@ -30,7 +30,7 @@ add_executable(rp2040_netsupply
     src/config.c
     src/ethernet.c
     src/sys_arch.c
-    lib/fatfs/ff.c         # <--- FatFS Hauptdatei
+    lib/fatfs/pff.c         # <--- FatFS Hauptdatei
     lib/fatfs/diskio.c     # <--- ggf. weitere FatFS-Dateien
 )
 
